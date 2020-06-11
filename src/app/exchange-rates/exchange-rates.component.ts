@@ -1,35 +1,46 @@
 import { Component, OnInit } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import gql from 'graphql-tag';
-import { Observable } from 'rxjs';
-import { shareReplay, map } from 'rxjs/operators';
 
 @Component({
   selector: 'exchange-rates',
-  templateUrl: './exchange-rates.component.html'
+  template: `
+    <div *ngIf="loading">
+      Loading...
+    </div>
+    <div *ngIf="error">
+      Error :(
+    </div>
+    <div *ngIf="rates">
+      <div *ngFor="let rate of rates">
+        <p>{{rate.currency}}: {{rate.rate}}</p>
+      </div>
+    </div>
+  `,
 })
 export class ExchangeRates implements OnInit {
-  rates$: any
-    // Observable<any[]>;
-  loading$: Observable<boolean>;
-  errors$: Observable<any>;
+  rates: any[];
+  loading = true;
+  error: any;
 
   constructor(private apollo: Apollo) { }
 
   ngOnInit() {
-    const source$ = this.apollo.query({
-      query: gql`
-        {
-          rates(currency: "USD") {
-            currency
-            rate
+    this.apollo
+      .watchQuery({
+        query: gql`
+          {
+            rates(currency: "USD") {
+              currency
+              rate
+            }
           }
-        }
-      `
-    }).pipe(shareReplay(1));
-
-    this.rates$ = source$.pipe(map(result => console.log(JSON.stringify(result))));
-    this.loading$ = source$.pipe(map(result => result.loading));
-    this.errors$ = source$.pipe(map(result => result.errors));
+        `,
+      })
+      .valueChanges.subscribe((result: any) => {
+        this.rates = result.data && result.data.rates;
+        this.loading = result.loading;
+        this.error = result.error;
+      });
   }
 }

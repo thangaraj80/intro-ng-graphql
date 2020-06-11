@@ -8,23 +8,18 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { AppComponent } from './app.component';
 import { ExchangeRates } from './exchange-rates/exchange-rates.component';
 
+// Apollo
+import { GraphQLModule } from "./graphql.module";
+
+
 @NgModule({
-  imports: [BrowserModule, HttpClientModule, ApolloModule, HttpLinkModule],
-   providers: [],
+  imports: [BrowserModule, HttpClientModule, ApolloModule, HttpLinkModule, GraphQLModule],
+  providers: [],
   declarations: [AppComponent, ExchangeRates],
   bootstrap: [AppComponent, ]
   
 })
 export class AppModule { 
-  constructor(
-    apollo: Apollo,
-    httpLink: HttpLink
-  ) { 
-    apollo.create({
-      link: httpLink.create({ uri: 'https://48p1r2roz4.sse.codesandbox.io' }),
-      cache: new InMemoryCache()
-    });
-  }
-
+  constructor() { }
   
 }
